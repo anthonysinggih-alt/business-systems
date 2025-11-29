@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transaction History</title>
+</head>
+<body>
+    <h1>Transaction History</h1>
+
+    <a href="/customer">Back to Customer View</a> |
+    <a href="/admin">Admin Panel</a>
+
+    <br><br>
+
+    <a href="/transactions/download_csv">
+        <button>Download as CSV</button>
+    </a>
+
+    <hr>
+
+    {% for trans in transactions %}
+    <div style="border: 2px solid black; padding: 15px; margin: 20px 0;">
+        <h2>Transaction #{{ trans.id }} - {{ trans.date.strftime('%Y-%m-%d %H:%M:%S') }}</h2>
+
+        <table border="1" style="margin: 10px 0;">
+            <tr>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+            {% for item in trans.item_list %}
+            <tr>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                <td>${{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <p>
+            <strong>Subtotal:</strong> ${{ "%.2f"|format(trans.subtotal) }} |
+            <strong>Tax:</strong> ${{ "%.2f"|format(trans.tax) }} |
+            <strong>Total:</strong> ${{ "%.2f"|format(trans.total) }} |
+            <strong>Payment Method:</strong> {{ trans.payment_type }}
+        </p>
+    </div>
+    {% endfor %}
+
+    {% if transactions|length == 0 %}
+    <p>No transactions yet.</p>
+    {% endif %}
+</body>
+</html>
