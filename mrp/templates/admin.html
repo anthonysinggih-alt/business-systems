@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin — Base & Component Items</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<script>
+function addBomRow() {
+    const container = document.getElementById('bom-rows');
+    const row = document.createElement('div');
+    row.className = 'row g-2 mb-2 align-items-center';
+    row.innerHTML = `
+        <div class="col-md-3">
+            <select class="form-select" name="source_type[]" onchange="updateChildOptions(this)">
+                <option value="base">Base Item</option>
+                <option value="component">Component</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <select class="form-select" name="child_sku[]">
+                ${window.baseOptions}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input class="form-control" name="qty_per[]" type="number" step="0.01" placeholder="Qty per Unit">
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+// Switch dropdown between base items and components
+function updateChildOptions(selectElem) {
+    const row = selectElem.closest('.row');
+    const childDropdown = row.querySelector('select[name="child_sku[]"]');
+    if (selectElem.value === 'base') {
+        childDropdown.innerHTML = window.baseOptions;
+    } else {
+        childDropdown.innerHTML = window.compOptions;
+    }
+}
+</script>
+</head>
+<body class="p-4">
+<div class="container">
+
+<a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm mb-3">⬅ Back</a>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- ========================================================= -->
+<!-- SECTION 1: Add Base Item -->
+<!-- ========================================================= -->
+<h2>🧱 Add Base Item</h2>
+<form method="POST" class="row g-2 mb-4">
+    <input type="hidden" name="form_type" value="base">
+    <div class="col-md-3"><input class="form-control" name="name" placeholder="Item Name" required></div>
+    <div class="col-md-3"><input class="form-control" name="vendor" placeholder="Vendor"></div>
+    <div class="col-md-2"><input class="form-control" name="unit_price" type="number" step="0.01" placeholder="Unit Price"></div>
+    <div class="col-md-2"><input class="form-control" name="qty_in_stock" type="number" step="0.01" placeholder="Initial Qty"></div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Add Base Item</button></div>
+</form>
+
+<table class="table table-bordered table-striped mb-5">
+    <thead><tr><th>ID</th><th>Name</th><th>Vendor</th><th>Price</th><th>Qty</th></tr></thead>
+    <tbody>
+        {% for i in base_items %}
+        <tr><td>{{ i.id }}</td><td>{{ i.name }}</td><td>{{ i.vendor }}</td><td>{{ i.unit_price }}</td><td>{{ i.qty_in_stock }}</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- ========================================================= -->
+<!-- SECTION 2: Add Component -->
+<!-- ========================================================= -->
+<h2>⚙️ Add Component</h2>
+<form method="POST" class="mb-4">
+    <input type="hidden" name="form_type" value="component">
+    <div class="row g-2 mb-3">
+        <div class="col-md-2">
+            <input class="form-control" name="sku" placeholder="Component SKU" required>
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" name="comp_name" placeholder="Component Name" required>
+        </div>
+        <div class="col-md-2">
+            <input class="form-control" name="lead_time" type="number" placeholder="Lead Time (Hours)" min="0">
+        </div>
+        <div class="col-md-2">
+            <button type="button" class="btn btn-outline-secondary w-100" onclick="addBomRow()">+ Add Child</button>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-success w-100">Save Component</button>
+        </div>
+    </div>
+
+    <div id="bom-rows"></div>
+</form>
+
+<!-- Existing Components -->
+<h3>📋 Existing Components</h3>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>SKU</th>
+            <th>Name</th>
+            <th>Lead Time (Hours)</th>
+            <th>Qty in Stock</th>
+            <th>Child Items (BOM)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in components %}
+        <tr>
+            <td>{{ c.sku }}</td>
+            <td>{{ c.name }}</td>
+            <td>{{ c.lead_time }}</td>
+            <td>{{ c.qty_in_stock }}</td>
+            <td>{{ bom_map.get(c.sku, '-') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+window.baseOptions = `
+    {% for b in base_items %}
+    <option value="{{ b.name }}">{{ b.name }} (Base)</option>
+    {% endfor %}
+`;
+window.compOptions = `
+    {% for c in components %}
+    <option value="{{ c.sku }}">{{ c.sku }} (Component)</option>
+    {% endfor %}
+`;
+</script>
+
+</div>
+</body>
+</html>

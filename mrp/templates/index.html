@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MRP System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body class="p-4 text-center">
+    <div class="container">
+        <h1 class="mb-4">🏭 MRP System</h1>
+        <a href="{{ url_for('schedule') }}" class="btn btn-warning m-2">📋 Production Schedule</a>
+        <a href="{{ url_for('admin') }}" class="btn btn-primary m-2">🧱 Admin — Manage Base Items</a>
+        <a href="{{ url_for('procurement') }}" class="btn btn-success m-2">📦 Procurement — Purchase Items</a>
+    </div>
+</body>
+</html>
